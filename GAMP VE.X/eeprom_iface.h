@@ -239,11 +239,12 @@ struct {
  *  unsigned char bufselector                                                 *
  *  EEPROM_BUFFADDX2 *address                                                 *
  *  unsigned char *buffer                                                     *
- *  unsigned len                                                              *
+ *  unsigned int len                                                          *
  * Returns:void                                                               *
  * Atomic SPI Bus Transaction                                                 *
  * ***************************************************************************/
-void EEPROM_writeBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len);
+void EEPROM_writeBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, 
+        unsigned char *buffer, unsigned int len);
 
 /* ****************************************************************************
  * Function: EEPROM_readBuffer                                                *
@@ -258,7 +259,8 @@ void EEPROM_writeBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, un
  * Returns:void + buffer filled for len.                                      *
  * Atomic SPI Bus Transaction                                                 *
  * ***************************************************************************/
-void EEPROM_readBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len);
+void EEPROM_readBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, 
+        unsigned char *buffer, unsigned int len);
 
 /* ****************************************************************************
  * Function: EEPROM_storeBuffer                                               *
@@ -269,7 +271,7 @@ void EEPROM_readBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, uns
  *  EEPROM_BUFFADDX2 *address                                                 *
  * Returns:void                                                               *
  * Atomic SPI Bus Transaction                                                 *
-* ***************************************************************************/
+ *****************************************************************************/
 void EEPROM_storeBuffer(unsigned char bufselector,EEPROM_pADDRESS3 paddress);
 
 /* ****************************************************************************
@@ -284,7 +286,8 @@ void EEPROM_storeBuffer(unsigned char bufselector,EEPROM_pADDRESS3 paddress);
  * Returns:void + buffer filled for len.                                      *
  * Atomic SPI Bus Transaction                                                 *
  * ***************************************************************************/
-void EEPROM_writeFlash(unsigned char bufselector, EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len);
+void EEPROM_writeFlash(unsigned char bufselector, EEPROM_pADDRESS3 paddress, 
+        unsigned char *buffer, unsigned int len);
 
 /* ****************************************************************************
  * Function: EEPROM_readFlash                                                 *
@@ -297,7 +300,8 @@ void EEPROM_writeFlash(unsigned char bufselector, EEPROM_pADDRESS3 paddress, uns
  * Returns:void + buffer filled for len.                                      *
  * Atomic SPI Bus Transaction                                                 *
  * ***************************************************************************/
-void EEPROM_readFlash(EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len);
+void EEPROM_readFlash(EEPROM_pADDRESS3 paddress, unsigned char *buffer, 
+        unsigned int len);
 
 /* ****************************************************************************
  * Function: EEPROM_eraseChip                                                 *
@@ -374,12 +378,50 @@ unsigned EEPROM_newPage(void);
  * Function: EEPROM_writeData                                                 *
  * write up to 256 bytes to the flash buffer for subsequent write to page     *
  * Inputs                                                                     *
- *   unsigned char *buffer // up to 2566 buttes fof data                      *
+ *   unsigned char *buffer // up to 2566 bytes fof data                       *
  *   unsigned char len // the length of the data buffer                       *
  * Returns void                                                               *
  * ***************************************************************************/
-void EEPROM_writeData(unsigned char *buffer, unsigned char len);
+void EEPROM_writeData(unsigned char *buffer, unsigned int len);
 
+
+/******************************************************************************
+ * Function: EEPROM_readData                                                  *
+ * Sequences through the flash pages returning up to 256 bytes per read.      *
+ * commences at currentRPage and returns an ERROR when page is currentRPage.  *
+ * currentRPage is not modified.  Use EEPROM_resetReadDataPointer             *
+ * Inputs                                                                     *
+ *   unsigned char *buffer // up to 256 bytes fof data                        *
+ *   unsigned char len // the length of the data buffer (1-255 bytes          *
+ * Returns ERROR when currentRPage  == currentWPage                           *
+ * ***************************************************************************/
+unsigned char EEPROM_readData(unsigned char *buffer, unsigned int len);
+
+/******************************************************************************
+ * Function: EEPROM_resetReadDataPointer                                      *
+ * Resets the internal read pointer to the currentRPage to facilitate reading *
+ * the same data again (eg if the USB fails.                                  *
+ * Inputs void                                                                *
+ * Returns void                                                               *
+ * ***************************************************************************/
+void EEPROM_resetReadDataPointer(void);
+
+/******************************************************************************
+ * Function: EEPROM_clearReadData                                             *
+ * Clears the currentReadPage back to the same value as the currentWritePage  *
+ * and resets the internal readPointer;                                       *
+ * Inputs void                                                                *
+ * Returns void                                                               *
+ * ***************************************************************************/
+void EEPROM_clearReadData(void);
+
+/******************************************************************************
+ * Function: EEPROM_initialisePage0                                           *
+ * clears page 0 to defaults                                                  *
+ * Inputs void                                                                *
+ * Returns void                                                               *
+ * ***************************************************************************/
+void EEPROM_initialisePage0(void);
 
 /******************************************************************************
  * Function: EEPROM_initialisePage0                                           *

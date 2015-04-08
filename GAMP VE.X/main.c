@@ -224,59 +224,35 @@ unsigned char EEPROMWriteBufferTest(void)
 
 void initialiseEEPROMReadWriteFlash(void)
 {
-    for(unsigned n = 0; n<EEPROM_PAGESIZE;n++)
+    for(unsigned int n = 0; n<EEPROM_PAGESIZE;n++)
     {
-        buff1[n] = n;
+        buff1[n] = 0xFF;
         buff2[n] = 0;
     }
 }
 
-#define FLASHITERATIONS 32767
-#define BLOCKSIZE 128
+#define FLASHITERATIONS 10000
+#define BLOCKSIZE 256
 unsigned char EEPROMReadWriteFlashTest(void)
 {
+    EEPROM_clearReadData();
     initialiseEEPROMReadWriteFlash();
 
-    unsigned int n = 0;
-    for(n = 0; n < FLASHITERATIONS; n++) // 8 to start with
+    for(unsigned int n = 0; n < FLASHITERATIONS; n++)
     {
         EEPROM_writeData(buff1,BLOCKSIZE);
     }
-    EEPROM_ADDRESS3 address;
-    SETADDRESS3_256(address,1,0);
 
-    unsigned int page = 1;
-    unsigned int offset = 0;
-    flashLEDSuccess();
-    n = 0;
-    while(n < FLASHITERATIONS)
+//    flashLEDSuccess();
+
+    for(unsigned int n = 0; n < FLASHITERATIONS; n++)
     {
-        SETADDRESS3_256(address,page,offset);
-        if((EEPROM_PAGESIZE - offset) >= BLOCKSIZE)
-        {
-            EEPROM_readFlash(&address, &buff2,BLOCKSIZE);
-        }
-        else
-        {
-            // Need 2 reads
-            unsigned int t = EEPROM_PAGESIZE - offset;
-            EEPROM_readFlash(&address, &buff2,t);
-            page++;
-            offset = 0;
-            SETADDRESS3_256(address,page,offset);
-            EEPROM_readFlash(&address, &buff2[t],BLOCKSIZE - t);
-        }
-        if (compareBuffers(BLOCKSIZE) != SUCCESS)
+        EEPROM_readData(&buff2,sizeof(buff2));
+        if (compareBuffers(256) != SUCCESS)  // readDATA reads pages only...
             return ERROR;
-        offset += BLOCKSIZE;
-        if (offset >= EEPROM_PAGESIZE)
-        {
-            page++;
-            offset = offset - 256;
-        }
         initialiseEEPROMReadWriteFlash(); // Not efficient as it reinitialises both arrays...
-        n++;
     }
+
     return SUCCESS;
 }
 
