@@ -215,14 +215,12 @@ void notAckI2C2( void )
 
 unsigned char I2CReadRegister(unsigned char busAdr, unsigned char reg, unsigned char *buffer, unsigned len)
 {
-    signed char result = 0;
-
     // Start the bus
     idleI2C2();
     startI2C2();
     idleI2C2();
     // Nominate the register on the bus device
-    if((result = writeI2C2(MAKEI2CWRITEADDRESS(busAdr))) == -2)
+    if(writeI2C2(MAKEI2CWRITEADDRESS(busAdr)) == -2)
     {
         // if collision we should send again.
         // if Nack we should fail the device somewhere
@@ -231,7 +229,7 @@ unsigned char I2CReadRegister(unsigned char busAdr, unsigned char reg, unsigned 
         return ERROR;
     }
     idleI2C2();
-    if((result = writeI2C2(reg)) == -2)
+    if(writeI2C2(reg) == -2)
     {
         // if collision we should send again.
         // if Nack we should fail the device somewhere
@@ -244,7 +242,7 @@ unsigned char I2CReadRegister(unsigned char busAdr, unsigned char reg, unsigned 
     // Restart the bus and send the read command
     restartI2C2();
     idleI2C2();
-    if((result = writeI2C2(MAKEI2CREADADDRESS(busAdr))) == -2)
+    if(writeI2C2(MAKEI2CREADADDRESS(busAdr)) == -2)
     {
         // if collision we should send again.
         // if Nack we should fail the device somewhere
@@ -275,11 +273,10 @@ unsigned char I2CReadRegister(unsigned char busAdr, unsigned char reg, unsigned 
 
 unsigned char I2CWriteRegister(unsigned char busAdr, unsigned char reg, unsigned char *buffer, unsigned len)
 {
-    signed char result = 0;
     idleI2C2();
     startI2C2();
     idleI2C2();
-    if((result = writeI2C2(MAKEI2CWRITEADDRESS(busAdr))) == -2)
+    if(writeI2C2(MAKEI2CWRITEADDRESS(busAdr)) == -2)
     {
         // if collision we should send again.
         // if Nack we should fail the device somewhere
@@ -288,7 +285,7 @@ unsigned char I2CWriteRegister(unsigned char busAdr, unsigned char reg, unsigned
         return ERROR;
     }
     idleI2C2();
-    if((result = writeI2C2(reg)) == -2)
+    if(writeI2C2(reg) == -2)
     {
         // if collision we should send again.
         // if Nack we should fail the device somewhere
@@ -299,7 +296,7 @@ unsigned char I2CWriteRegister(unsigned char busAdr, unsigned char reg, unsigned
     idleI2C2();
     for(unsigned n = 0 ; n < len; n++)
     {
-        if((result = writeI2C2(buffer[n])) == -2)
+        if(writeI2C2(buffer[n]) == -2)
         {
             // if collision we should send again.
             // if Nack we should fail the device somewhere

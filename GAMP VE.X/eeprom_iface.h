@@ -94,43 +94,6 @@ typedef sPage0 *pPage0;
 #define EEPROM_READ_FLASH               0xD2
 
 
-//typedef struct
-//{
-//    unsigned long                       lastupdatetime;
-//    unsigned int                        writepage;
-//    unsigned int                        readpage;
-//    unsigned char                       writesector;
-//} EEPROM_ControlPage;
-//
-//typedef EEPROM_ControlPage *EEPROM_ControlPage_p;
-
-//typedef union {
-//    struct { // This structure is used for 8 bit addresses to the 256 byte pages
-//        unsigned APAHiByte              :8;
-//        unsigned APALoByte              :8;
-//        unsigned ADA                    :8;  // The  address within the buffer
-//    };
-//    struct { // This structure is used for 9 bit addresses to the 264 byte pages
-//        unsigned BPAHiByte              :7;  // Dummy bits
-//        unsigned BPALoByte              :8;  // Dummy bits
-//        unsigned BDA09                  :1;  // The buffer address high bit
-//        unsigned BDA                    :8;  // The buffer address Low byte
-//    };
-//    struct {
-//        unsigned BPAHiByte              :7;  // Dummy bits
-//        unsigned BPALoByte              :8;  // Dummy bits
-//        unsigned BDA09                  :1;  // The buffer address high bit
-//        unsigned BDA                    :8;  // The buffer address Low byte
-//
-//    };
-//    struct {
-//        unsigned char buc1              :8;
-//        unsigned char buc2              :8;
-//        unsigned char buc3              :8;
-//        unsigned char buc4              :8;
-//    };
-//} EEPROM_BUFFADDX;
-//typedef EEPROM_BUFFADDX *EEPROM_pBUFFADDX;
 
 
 typedef union { // For Addresses 3 Bytes long
@@ -152,39 +115,24 @@ typedef union { // For Addresses 3 Bytes long
 } EEPROM_ADDRESS3;
 typedef EEPROM_ADDRESS3 *EEPROM_pADDRESS3;
 
-//#define SETADDRESS3_256(Adr,page,offset) { Adr.ABlank1=0; Adr.APage15=page; \
-//                                    Adr.AOffset8=offset; };
-
 #define SETADDRESS3_256(Adr,page,offset) { \
                                 Adr.buc1=(unsigned char)((page&0x7f00)>>8); \
                                 Adr.buc2 = (unsigned char)(page&0x00FF),\
                                 Adr.buc3=offset; };
 
-#define SETADDRESS3_264(Adr,page,offset) { Adr.buc1=(unsigned char)((page&0xFF00)>>8); \
+#define SETADDRESS3_264(Adr,page,offset) { \
+                                Adr.buc1=(unsigned char)((page& 0xFF00)>>8); \
                                 Adr.buc2=(unsigned char)(page&0x00FF), \
                                 Adr.BOffset9=offset; };
 
 #define CLEARADDRESS3(Adr) { Adr.buc1 = 0x00; Adr.buc2 = 0x00; \
                             Adr.buc3 = 0x00; };
 
-//#define SETADDRESS_3(Adr,b1,b2,b3) { Adr.buc1 = b1; Adr.buc2 = b2; \
-                            Adr.buc3 = b3; Adr.buc4 = 0x00; }
-
 #define SETADDRESS_4(Adr, b1,b2,b3,b4) { Adr.buc1 = b1; Adr.buc2 = b2; \
                             Adr.buc3 = b3; Adr.buc4 = b4; }
 
 #define PAGEADDRESS256(Adr, c1) { Adr.CPAHiBit = 0; Adr.CPAPage = c1; \
                             Adr.CPABlank = 0x0000; }
-
-
-typedef union {
-    struct {
-        unsigned             :8;    // Dummy bits
-        unsigned             :7;    // Dummy bits
-        unsigned buff_add    :9;    // The buffer address
-    };
-}EEPROM_BUFFADDX1;
-
 
 
 #define EEPROM_RST_TRIS TRISDbits.TRISD4

@@ -101,31 +101,6 @@ void waitReady(void)
     writePending = FALSE;
 }
 
-/* ****************************************************************************
- * Function: checkWritePending                                                *
- * blocks until any previous write has completed before turning               *
- * Inputs: void                                                               *
- * Returns:1 void                                                             *
- * NOT Atomic                                                                 *
- * ***************************************************************************/
-//void checkWritePending(void)
-//{
-////    if(!writePending)
-// //       return;
-//
-//    EEPROM_Status_byte1 b1;
-//    EEPROM_Status_byte2 b2;
-//    requestStatus(&b1,&b2);
-//    while(b1.Rdy_Busy & 0b10000000)
-//    {
-//        Delay1TCYx(20);
-//        requestStatus(&b1,&b2);
-//    }
-//    writePending = FALSE;
-//    // Now check that there were no errors
-//    if(b2.ErasePgmErr)
-//        APP_errorlog(PGM_ERR);
-//}
 
 
 unsigned char EEPROM_getManufacturerId(unsigned char index)
@@ -152,7 +127,6 @@ void EEPROM_requestManufacturerId(void)
 void EEPROM_writeBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len)
 {
     waitReady();
-    //checkWritePending(); // blocks if there is a write outstanding
 
     MEM_CS_LO
     if(bufselector == EEPROM_BUFFER1)
@@ -169,7 +143,6 @@ void EEPROM_writeBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, un
 void EEPROM_readBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned len)
 {
     waitReady();
-    // checkWritePending(); // bcheckWritePendinglocks if there is a write outstanding
 
     MEM_CS_LO
     if(bufselector == EEPROM_BUFFER1)
@@ -187,7 +160,6 @@ void EEPROM_readBuffer(unsigned char bufselector, EEPROM_pADDRESS3 paddress, uns
 void EEPROM_storeBuffer(unsigned char bufselector,EEPROM_pADDRESS3 paddress)
 {
     waitReady();
-    // checkWritePending(); // blocks if there is a write outstanding
 
     MEM_CS_LO
     if(bufselector == EEPROM_BUFFER1)
@@ -205,7 +177,6 @@ void EEPROM_writeFlash(unsigned char bufselector, EEPROM_pADDRESS3 paddress, uns
 {
     // OPCODE 0x82 or 0x85
     waitReady();
-    //checkWritePending(); // blocks if there is a write outstanding
 
     MEM_CS_LO
     if(bufselector == EEPROM_BUFFER1)
@@ -228,7 +199,6 @@ void EEPROM_readFlash(EEPROM_pADDRESS3 paddress, unsigned char *buffer, unsigned
     dummy[3] = 0;
 
     waitReady();
-    //checkWritePending(); // blocks if there is a write outstanding
 
     MEM_CS_LO
     // Send OPCODE
@@ -306,7 +276,6 @@ void EEPROM_initialisePage0(void)
 
 void EEPROM_initialise(void)
 {
-    UTC utc;
     EEPROM_requestManufacturerId();
     writePending = FALSE;
 
@@ -323,7 +292,7 @@ void EEPROM_initialise(void)
     RTCgetTime(&(eeprom_page0.startTm));
 }
 
-unsigned EEPROM_newPage(void)
+unsigned int EEPROM_newPage(void)
 {
     EEPROM_ADDRESS3 address;
     SETADDRESS3_256(address,eeprom_page0.currentWPage,0);

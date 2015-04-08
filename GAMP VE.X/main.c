@@ -231,8 +231,8 @@ void initialiseEEPROMReadWriteFlash(void)
     }
 }
 
-#define FLASHITERATIONS 9
-
+#define FLASHITERATIONS 32767
+#define BLOCKSIZE 128
 unsigned char EEPROMReadWriteFlashTest(void)
 {
     initialiseEEPROMReadWriteFlash();
@@ -240,26 +240,46 @@ unsigned char EEPROMReadWriteFlashTest(void)
     unsigned int n = 0;
     for(n = 0; n < FLASHITERATIONS; n++) // 8 to start with
     {
-        EEPROM_writeData(buff1,128);
+        EEPROM_writeData(buff1,BLOCKSIZE);
     }
     EEPROM_ADDRESS3 address;
     SETADDRESS3_256(address,1,0);
-//    EEPROM_storeBuffer(1,&address);
-//    EEPROM_readFlash(&address, &buff2,128);
-//        if (compareBuffers(128) == ERROR)
-//            return ERROR;
 
-    for(n = 0; n< FLASHITERATIONS; n++)
+    unsigned int page = 1;
+    unsigned int offset = 0;
+    flashLEDSuccess();
+    n = 0;
+    while(n < FLASHITERATIONS)
     {
-        unsigned t = (n << 7)+256;
-        SETADDRESS3_256(address,(unsigned char)(((t)&0xFF00)>>8),
-                            (unsigned char)((t)&0x00FF));
-        EEPROM_readFlash(&address, &buff2,128);
-        if (compareBuffers(128) == ERROR)
+        SETADDRESS3_256(address,page,offset);
+        if((EEPROM_PAGESIZE - offset) >= BLOCKSIZE)
+        {
+            EEPROM_readFlash(&address, &buff2,BLOCKSIZE);
+        }
+        else
+        {
+            // Need 2 reads
+            unsigned int t = EEPROM_PAGESIZE - offset;
+            EEPROM_readFlash(&address, &buff2,t);
+            page++;
+            offset = 0;
+            SETADDRESS3_256(address,page,offset);
+            EEPROM_readFlash(&address, &buff2[t],BLOCKSIZE - t);
+        }
+        if (compareBuffers(BLOCKSIZE) != SUCCESS)
             return ERROR;
+        offset += BLOCKSIZE;
+        if (offset >= EEPROM_PAGESIZE)
+        {
+            page++;
+            offset = offset - 256;
+        }
+        initialiseEEPROMReadWriteFlash(); // Not efficient as it reinitialises both arrays...
+        n++;
     }
     return SUCCESS;
 }
+
 
 void initialiseRTCTest(void)
 {
@@ -307,8 +327,6 @@ void initialiseNAVTest(void)
 
 unsigned char I2CNAVTest(void)
 {
-    unsigned result = 0;
-    unsigned aggregate = true;
     unsigned char gyrin[3];
     unsigned char accin[3];
     initialiseNAVTest();
@@ -316,12 +334,12 @@ unsigned char I2CNAVTest(void)
     {
         gyrin[0] = gyrin[1] = gyrin[2] = 0;
         accin[0] = accin[1] = accin[2] = 0;
-        result = NAVReadRegister(SELF_TEST_X_GYRO, (unsigned char *)&gyrin[0], sizeof(unsigned char));
-        result = NAVReadRegister(SELF_TEST_Y_GYRO, (unsigned char *)&gyrin[1], sizeof(unsigned char));
-        result = NAVReadRegister(SELF_TEST_Z_GYRO, (unsigned char *)&gyrin[2], sizeof(unsigned char));
-        result = NAVReadRegister(SELF_TEST_X_ACCEL, (unsigned char *)&accin[0], sizeof(unsigned char));
-        result = NAVReadRegister(SELF_TEST_Y_ACCEL, (unsigned char *)&accin[1], sizeof(unsigned char));
-        result = NAVReadRegister(SELF_TEST_Z_ACCEL, (unsigned char *)&accin[2], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_X_GYRO, (unsigned char *)&gyrin[0], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_Y_GYRO, (unsigned char *)&gyrin[1], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_Z_GYRO, (unsigned char *)&gyrin[2], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_X_ACCEL, (unsigned char *)&accin[0], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_Y_ACCEL, (unsigned char *)&accin[1], sizeof(unsigned char));
+        NAVReadRegister(SELF_TEST_Z_ACCEL, (unsigned char *)&accin[2], sizeof(unsigned char));
 
         // Check the returned values if we had a failure one would not be set.
         if(((gyrin[0] != 0xC6) && (gyrin[0] != 0xBD)) ||
