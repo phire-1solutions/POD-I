@@ -363,6 +363,9 @@ void initialiseApplication(void)
     ENABLESPI1
     EEPROM_initialise();
 
+    // Initialise the USB Interface
+    USB_initialise();
+
     enableInterupts();
 
 

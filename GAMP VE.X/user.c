@@ -285,3 +285,7 @@ void enableInterupts(void)
 
 }
 
+void configureUSB(void)
+{
+    
+}
